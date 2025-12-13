@@ -182,6 +182,7 @@
     <h2>Contenido</h2>
     <nav>
       <a href="#introduccion"><i data-lucide="book-open"></i> Introducción</a>
+      <a href="#explicacion"><i data-lucide="book-open"></i> Explicación</a>
       <a href="#marco"><i data-lucide="layers"></i> Marco teórico</a>
       <a href="#metodologia"><i data-lucide="flask-round"></i> Metodología</a>
       <a href="#resultados"><i data-lucide="bar-chart-3"></i> Resultados</a>
@@ -214,6 +215,18 @@
       identidad del mismo individuo durante varios fotogramas, generando trayectorias y estadísticas de presencia.</p>
     <p>El resultado es una aplicación funcional que combina modelos modernos de detección con técnicas clásicas de seguimiento, evaluada mediante métricas 
       cuantitativas y visualizaciones generadas a partir de la secuencia de video procesada.</p>
+
+    <h2 id="explicacion">Explicación del proyecto</h2> 
+    <!-- Video de ejemplo: coloca este bloque después de la introducción -->
+    <figure style="margin:1.25rem 0; max-width:900px;">
+      <video controls playsinline preload="metadata" style="width:100%; height:auto; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <source src="data/explicacion.mp4" type="video/mp4">
+        Tu navegador no soporta la etiqueta video.
+      </video>
+      <figcaption style="font-size:0.9rem; color:var(--muted); margin-top:0.4rem;">
+        Video 1 — Explicación de ejecución pipeline.
+      </figcaption>
+    </figure>
 
     <h2 id="marco">Marco teórico</h2>
     <ul>
@@ -279,6 +292,17 @@
          y la evolución temporal de cada objeto. Este material permitió validar cualitativamente la coherencia del seguimiento y confirmar que la integración 
          detección–flujo óptico produce trayectorias estables y coherentes en la mayoría de los casos.</p>
     </ol>
+
+    <!-- Video de ejemplo: coloca este bloque después de la introducción -->
+    <figure style="margin:1.25rem 0; max-width:900px;">
+      <video controls playsinline preload="metadata" style="width:100%; height:auto; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <source src="results/cis_val_run/tracking.mp4" type="video/mp4">
+        Tu navegador no soporta la etiqueta video.
+      </video>
+      <figcaption style="font-size:0.9rem; color:var(--muted); margin-top:0.4rem;">
+        Video 1 — Secuencia de cámaras trampa con detección.
+      </figcaption>
+    </figure>
 
     <h2 id="conclusion">Conclusión</h2>
     <p>El sistema desarrollado demuestra que la combinación de un detector profundo como YOLOv8 con un módulo de seguimiento basado en flujo óptico constituye una 
