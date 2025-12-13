@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taller 1: Fundamentos y Calibración de Cámara</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --accent: #0ea5a4;
+      --bg: #f8f9fb;
+      --text: #0f172a;
+      --muted: #6b7280;
+      --card: #ffffff;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      display: flex;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 100%;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      transition: transform 0.3s ease-in-out;
+      z-index: 200;
+    }
+
+    .sidebar.collapsed {
+      transform: translateX(-100%);
+    }
+
+    .sidebar h2 {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      color: var(--text);
+      padding: 0.5rem 0.8rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+
+    .sidebar nav a:hover {
+      background: var(--accent);
+      color: white;
+      transform: translateX(4px);
+    }
+
+    /* HAMBURGER BUTTON */
+    .hamburger {
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      background: var(--card);
+      border: none;
+      box-shadow: var(--shadow);
+      border-radius: 10px;
+      padding: 0.6rem;
+      cursor: pointer;
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+
+    .hamburger:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* MAIN CONTENT */
+    main {
+      margin-left: 260px;
+      padding: 2rem 3rem;
+      max-width: 900px;
+      width: 100%;
+      transition: margin-left 0.3s ease-in-out;
+    }
+
+    main.collapsed {
+      margin-left: 0;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--text);
+      border-bottom: 2px solid var(--accent);
+      display: inline-block;
+      padding-bottom: 0.3rem;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      margin-top: 1.4rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    p {
+      margin-bottom: 1rem;
+      text-align: justify;
+    }
+
+    ul {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    strong {
+      color: var(--text);
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      main {
+        margin-left: 0;
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Botón hamburguesa -->
+  <button class="hamburger" id="menuBtn" aria-label="Abrir menú">
+    <i data-lucide="menu"></i>
+  </button>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <h2>Contenido</h2>
+    <nav>
+      <a href="#introduccion"><i data-lucide="book-open"></i> Introducción</a>
+      <a href="#marco"><i data-lucide="layers"></i> Marco teórico</a>
+      <a href="#metodologia"><i data-lucide="flask-round"></i> Metodología</a>
+      <a href="#resultados"><i data-lucide="bar-chart-3"></i> Resultados</a>
+      <a href="#conclusion"><i data-lucide="check-circle"></i> Conclusión</a>
+      <a href="#reporte"><i data-lucide="users"></i> Reporte individual</a>
+      <a href="#referencias"><i data-lucide="book"></i> Referencias</a>
+    </nav>
+  </aside>
+
+  <!-- Contenido -->
+  <main id="main">
+    <h1>Taller 4: Sistema de Detección y Seguimiento de Objetos en Video</h1>
+    <p><strong>Visión por Computador</strong><br>
+    <strong>Universidad Nacional de Colombia</strong><br>
+    <strong>Docente:</strong> Juan David Ospina Arango<br>
+    <strong>Estudiantes:</strong></p>
+    <ul>
+      <li>Santiago Betancur Montoya</li>
+      <li>Reinaldo David Lopez Narvaez</li>
+      <li>Jose Sebastian Garzon Parra</li>
+      <li>Monica Paola Vargas Tirado</li>
+    </ul>
+
+    <h2 id="introduccion">Introducción</h2>
+    <p>El análisis automatizado de video es uno de los campos más relevantes de la visión por computador, con aplicaciones en vigilancia, transporte inteligente, 
+      ecología, deportes y automatización industrial. En este proyecto se desarrolla un sistema completo capaz de detectar objetos mediante un modelo YOLO y 
+      seguirlos a lo largo del tiempo utilizando técnicas de flujo óptico, integrando ambos métodos dentro de un pipeline unificado de análisis de vídeo.</p>
+    <p>El trabajo se basa en videos reales provenientes del dataset de cámaras trampa de fauna del repositorio LILA.Caltech Camera Traps, los cuales contienen 
+      animales en ambientes naturales y condiciones visuales desafiantes. El sistema final no solo detecta objetos cuadro a cuadro, sino que también mantiene la 
+      identidad del mismo individuo durante varios fotogramas, generando trayectorias y estadísticas de presencia.</p>
+    <p>El resultado es una aplicación funcional que combina modelos modernos de detección con técnicas clásicas de seguimiento, evaluada mediante métricas 
+      cuantitativas y visualizaciones generadas a partir de la secuencia de video procesada.</p>
+
+    <h2 id="marco">Marco teórico</h2>
+    <ul>
+      <li><strong>Detección de objetos con YOLO:</strong></li>
+      <p>YOLO (You Only Look Once) es una familia de modelos de detección basados en redes convolucionales que formulan la detección como un problema de regresión
+         directa a partir de una única pasada por la imagen <a href="#lizardi2025">(Lizardi Vargas, 2025)</a>, el modelo predice simultáneamente las cajas delimitadoras, las clases y las probabilidades asociadas. 
+         Gracias a su alta velocidad y precisión, YOLO se ha consolidado como uno de los enfoques más utilizados en aplicaciones de visión por computador en tiempo real.</p>
+      <p>En este proyecto se emplea YOLOv8, una versión moderna que incorpora un backbone optimizado para imágenes pequeñas, predicciones libres de anclas y una 
+        arquitectura capaz de realizar inferencia en tiempo real, además de contar con soporte directo mediante la librería Ultralytics. Para cada fotograma procesado, 
+        el detector produce un conjunto de bounding boxes, etiquetas y puntajes de confianza, los cuales constituyen la entrada principal del módulo de seguimiento.</p>
+
+      <li><strong>Seguimiento mediante flujo óptico:</strong></li>
+      <p>El flujo óptico describe el desplazamiento aparente de los pixeles entre fotogramas consecutivos y permite estimar el movimiento local dentro de una secuencia de video <a href="#monzon2013">(Monzón López, 2013)</a>.</p>
+      <p>En este proyecto se utiliza el método de Lucas–Kanade, un algoritmo diferencial ampliamente empleado que supone movimientos pequeños entre fotogramas y calcula 
+        los vectores de desplazamiento a partir de puntos característicos presentes en la imagen. Esta técnica resulta especialmente adecuada para el seguimiento continuo 
+        de objetos previamente detectados, ya que mantiene la coherencia temporal y conserva información estructural asociada a bordes y texturas.</p> 
+        <p>En el pipeline desarrollado, YOLO realiza primero la detección de los objetos relevantes y, posteriormente, el flujo óptico permite rastrear los puntos internos de cada caja, 
+        manteniendo así la identidad del objeto a lo largo de la secuencia</p>
+  
+      <li><strong>Integración detección + seguimiento:</strong></li>
+      <p>La integración de ambos métodos se enmarca en la estrategia tracking-by-detection, un paradigma ampliamente utilizado en sistemas de seguimiento en video <a href="#sun2021">(Sun et al., 2021)</a>. 
+        El proceso inicia con la detección de objetos mediante YOLO en un fotograma clave. Luego, dentro de cada caja detectada se seleccionan puntos característicos mediante el método Shi–Tomasi, los cuales sirven como referencia para el rastreo. </p>
+      <p>El algoritmo de Lucas–Kanade sigue dichos puntos en los fotogramas posteriores, permitiendo actualizar la posición de los objetos y asignarles identificadores 
+        persistentes a lo largo del tiempo. Cuando el número de puntos rastreables disminuye o la confianza del seguimiento cae por debajo de un umbral, se ejecuta 
+        nuevamente la detección completa para recalibrar el sistema. Esta combinación equilibra la precisión espacial de las redes profundas con la estabilidad temporal 
+        del flujo óptico, logrando un seguimiento eficiente y robusto.</p>
+    </ul>
+      
+    <h2 id="metodologia">Metodología</h2>
+    <ol>
+      <p>La metodología desarrollada se basa en un enfoque tracking-by-detection que integra un detector YOLOv8 con un módulo de seguimiento por flujo óptico. 
+        El objetivo es identificar objetos en cada fotograma y mantener su identidad a lo largo del tiempo. Para ello se emplearon imágenes y anotaciones del 
+        dataset Caltech Camera Traps, las cuales fueron procesadas mediante herramientas propias del proyecto que normalizan rutas, formatos y estructuras 
+        COCO-like a través del módulo data_loader.py. Esto permitió construir un pipeline reproducible y compatible con distintos conjuntos de imágenes.</p>
+      <p>La etapa de detección se ejecutó con YOLOv8 utilizando pesos preentrenados de Ultralytics. Cada fotograma se procesó mediante el wrapper definido 
+        en detector.py, obteniendo cajas delimitadoras en formato XYXY, clases y puntajes de confianza. Las detecciones filtradas sirvieron de entrada para 
+        el módulo de seguimiento.</p>
+      <p>El seguimiento se implementó con un tracker basado en flujo óptico piramidal (Lucas–Kanade), definido en tracker.py. Para cada detección activa se 
+        generaron puntos característicos mediante el detector Shi–Tomasi y se estimó su desplazamiento entre fotogramas. Estos desplazamientos se usaron para 
+        predecir la nueva posición de cada caja. Posteriormente, las predicciones se asociaron a las detecciones del fotograma actual mediante el algoritmo 
+        Hungarian y una métrica de similitud basada en IoU, garantizando la asignación consistente de IDs. El sistema creó nuevos tracks cuando surgían objetos
+         no vistos y eliminó aquellos con varios fotogramas sin correspondencias válidas.</p>
+      <p>Todo el proceso se integró en el script run_pipeline.py, encargado de secuenciar detección, seguimiento, registro de resultados y evaluación. El pipeline 
+        generó archivos CSV con detecciones y trayectorias, métricas simples de desempeño (TP, FP, FN, precisión, recall), así como un video anotado producido por 
+        fauna.py, donde se visualizan cajas, IDs y etiquetas por fotograma. Esta estructura permitió evaluar de manera consistente la interacción entre detección y 
+        seguimiento y validar el funcionamiento global del sistema.</p>
+    </ol>
+    
+    <h2 id="resultados">Resultados y Análisis</h2>
+    <ol>
+      <p>El sistema de detección y seguimiento se evaluó procesando secuencias del dataset Caltech Camera Traps mediante el pipeline integrado. En primer lugar, 
+        YOLOv8 generó predicciones consistentes en la mayoría de los fotogramas, produciendo un total acumulado de detecciones proporcional al número de imágenes 
+        procesadas. Las cajas obtenidas presentaron niveles estables de confianza y permitieron inicializar adecuadamente los tracks.</p>
+      <p>El módulo de seguimiento basado en flujo óptico logró mantener identidades persistentes para la mayoría de los objetos visibles en la escena. La asociación 
+        entre predicciones y detecciones se realizó mediante IoU y Hungarian, reduciendo errores de emparejamiento y evitando la creación excesiva de nuevos IDs. 
+        Los tracks se actualizaron de manera estable incluso en presencia de pequeños desplazamientos, mientras que las situaciones con oclusiones o pérdida de 
+        puntos característicos activaron correctamente una nueva detección por parte del modelo, recuperando así las trayectorias.</p>
+      <p>Los resultados cuantitativos se registraron en archivos CSV, incluyendo el número de detecciones por fotograma, cajas normalizadas, identificadores asignados
+         y eventos de pérdida de seguimiento. Adicionalmente, se calcularon métricas simples de detección (precisión, recall y F1) utilizando las anotaciones COCO-like
+          de referencia. En general, el sistema mostró una correspondencia adecuada entre predicciones y ground truth en umbral IoU 0.5, con una proporción favorable 
+          de verdaderos positivos respecto a falsos positivos.</p>
+      <p>Finalmente, se generó un video anotado que ilustra visualmente el funcionamiento del pipeline. En este se observan las cajas de detección, los IDs asignados
+         y la evolución temporal de cada objeto. Este material permitió validar cualitativamente la coherencia del seguimiento y confirmar que la integración 
+         detección–flujo óptico produce trayectorias estables y coherentes en la mayoría de los casos.</p>
+    </ol>
+
+    <h2 id="conclusion">Conclusión</h2>
+    <p>El sistema desarrollado demuestra que la combinación de un detector profundo como YOLOv8 con un módulo de seguimiento basado en flujo óptico constituye una 
+      solución eficiente para el seguimiento de fauna en secuencias de video. La integración bajo un enfoque tracking-by-detection permitió aprovechar la 
+      precisión del modelo de detección y la continuidad temporal del flujo óptico, logrando trayectorias estables y manteniendo la identidad de los objetos 
+      incluso ante desplazamientos moderados o variaciones en la escena.</p>
+    <p>Los experimentos mostraron que el pipeline es capaz de procesar secuencias completas, generar métricas confiables y producir videos anotados que facilitan 
+      la verificación visual del rendimiento. Aunque el sistema presenta limitaciones ante oclusiones prolongadas o movimientos bruscos, en general mantuvo un 
+      comportamiento robusto y coherente. En conjunto, los resultados indican que esta arquitectura es adecuada para aplicaciones de monitoreo automatizado y 
+      constituye una base sólida para futuros avances, como incorporar métricas MOT completas, filtros de predicción más avanzados o modelos entrenados 
+      específicamente para fauna silvestre.</p>
+
+
+    <h2 id="reporte">Reporte de contribución individual</h2>
+    <p>El desarrollo de este proyecto se realizó de manera colectiva, manteniendo una comunicación constante entre los integrantes del equipo. 
+      Las tareas fueron distribuidas de siguiente manera:</p>
+    <ul>
+      <li>Reinaldo David Lopez Narvaez: Desarrollo e implementación de los módulos en Python, incluyendo detección con YOLOv8, seguimiento por flujo óptico e integración del pipeline. </li>
+      <li>Santiago Betancur Montoya: Análisis exploratorio de los datos y pruebas iniciales mediante el notebook exploratorio.</li>
+      <li>Monica Paola Vargas Tirado: Redacción de la documentación del proyecto (introducción, marco teórico y metodología).</li>
+      <li>Jose Sebastian Garzon Parra: Redacción de resultados, conclusiones y referencias. </li>
+    </ul>
+     
+
+    <h2 id="referencias">Referencias bibliográficas</h2>
+    <ol class="references">
+    
+      <li id="gongora2025">
+        Góngora Tun, A. E. (2025).
+        <em>Desarrollo de un algoritmo evolutivo con una codificación simbólica para estimar el desplazamiento de objetos</em>.
+      </li>
+
+      <li id="monzon2013">
+        Monzón López, N. M. (2013).
+        <em>Estimación del movimiento de objetos en secuencias de imágenes de intensidad y profundidad</em>.
+      </li>
+
+      <li id="lizardi2025">
+        Lizardi Vargas, J. P. (2025).
+        <em>Implementación y evaluación de algoritmos de seguimiento para el procesamiento de video</em>.
+      </li>
+
+      <li id="sun2021">
+        Sun, Z., Chen, J., Chao, L., Ruan, W., & Mukherjee, M. (2021).
+        <em>A Survey of Multiple Pedestrian Tracking Based on Tracking-by-Detection Framework. IEEE Transactions on Circuits and Systems for Video Technology, 31(5), 1819–1833.</em>
+        <a href="https://doi.org/10.1109/TCSVT.2020.3009717" target="_blank"> https://doi.org/10.1109/TCSVT.2020.3009717</a>
+      </li>
+
+      <li id="valencia2025">
+        Valencia Henao, J. M. (2025).
+        <em>Clasificación automatizada de especies de vida silvestre en áreas protegidas a partir de imágenes de cámaras trampa</em>.
+      </li>
+    </ul>
+  </main>
+
+  <script>
+    lucide.createIcons();
+    const menuBtn = document.getElementById("menuBtn");
+    const sidebar = document.getElementById("sidebar");
+    const main = document.getElementById("main");
+
+    // Estado inicial (sidebar visible en desktop)
+    let isCollapsed = false;
+
+    const toggleMenu = () => {
+      // En pantallas pequeñas
+      if (window.innerWidth <= 900) {
+        sidebar.classList.toggle("active");
+      } else {
+        isCollapsed = !isCollapsed;
+        sidebar.classList.toggle("collapsed", isCollapsed);
+        main.classList.toggle("collapsed", isCollapsed);
+      }
+    };
+
+    menuBtn.addEventListener("click", toggleMenu);
+
+    // Cerrar el menú si se hace clic fuera en móvil
+    document.addEventListener("click", (e) => {
+      if (window.innerWidth <= 900 && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+        sidebar.classList.remove("active");
+      }
+    });
+  </script>
+</body>
+</html>
