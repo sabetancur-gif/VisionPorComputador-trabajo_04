@@ -1,75 +1,90 @@
 # Visión por Computador: QuantumViz
 
-## 🧠 Trabajo 04 — Sistema de Detección y Seguimiento de Objetos en Video
+## 🧠 Trabajo 04 — Sistema de Detección y Seguimiento de Peatones (MOT17)
 
 ---
 
 ### 📌 Resumen
 
-Este repositorio documenta, implementa y evalúa un pipeline completo para la detección de objetos mediante YOLO y seguimiento de objetos mediante técnicas de flujo óptico, aplicada a un problema práctico.
+Este repositorio presenta el desarrollo, implementación y evaluación de un pipeline completo de visión por computador para detección y seguimiento de objetos en secuencias de video, utilizando:
 
-El objetivo es desarrollar una aplicación de visión por computador que integre detección de objetos mediante YOLO y seguimiento de objetos mediante técnicas de flujo óptico, aplicada a un problema práctico utilizando datos de video disponibles públicamente.
+* YOLOv8 para detección de objetos (personas)
+
+* Seguimiento basado en Flujo Óptico + IoU para asignación de identidades (tracking)
+
+El sistema se aplica sobre el dataset MOT17, ampliamente utilizado en investigación para Multiple Object Tracking (MOT), y permite generar resultados visuales, métricas cuantitativas y salidas reproducibles para análisis académico.
 
 ---
 
 ### 📁 Estructura del repositorio
 
 ```
-proyecto-clasificacion-imagenes-medicas/
+vision-por-computador-trabajo_04/
 ├── data/
-│   ├── sample/
-│   │   ├── images/
-│   │   │   ├── 5a0affad-23d2-11e8-a6a3-ec086b02610b
-│   │   │   └── 5a0affad-23d2-11e8-a6a3-ec086b02610b
-│   │   ├── cis_test_annotations.json
-│   │   ├── cis_val_annotations.json
-│   │   ├── train_annotations.json
-│   │   ├── trans_val_annotations.json
-│   │   └── fauna.mp4
+│   └── mot17/
+│       ├── images/
+│       │   ├── MOT17-02-FRCNN/
+│       │   ├── MOT17-04-FRCNN/
+│       │   └── ...
+│       └── annotations/
+│           ├── train.json
+│           ├── test.json
+│           ├── train_half.json
+│           └── val_half.json
+│
 ├── notebooks/
 │   └── exploratorio.ipynb
-├── resultados/
-│   └── cis_val_run/
-│   │   ├── detection_metrics.json
-│   │   ├── detection.csv
-│   │   ├── metrics.json
+│
+├── results/
+│   ├── cis_val_run/
+│   │   ├── figures/
+│   │   │   ├── detection_metrics.png
+│   │   │   ├── detections_per_frame.png
+│   │   │   ├── sample_frame_0.png
+│   │   │   └── ...
+│   │   ├── detections.csv
 │   │   ├── tracks.csv
-│   ├── fauna_frame_summary.csv
-│   └── fauna_recognized.mp4
+│   │   ├── metrics.json
+│   │   ├── detection_metrics.json
+│   │   └── tracking_result.mp4
+│   └── exploratorio/
+│
 ├── src/
 │   ├── __init__.py
 │   ├── data_loader.py
 │   ├── detector.py
-│   ├── eval.py
-│   ├── fauna.py
-│   ├── run_pipeline.py
 │   ├── tracker.py
-│   └── utils.py
-├── .gitignore
-├── README.md   # <- este archivo
+│   ├── eval.py
+│   ├── utils.py
+│   └── run_pipeline.py
+│
 ├── requirements.txt
-├── run_pipeline.sh
-└── yolo8n.pt
+├── yolo8n.pt
+└── README.md
 ```
 
 ---
 
 ### 🎯 Objetivos específicos
 
-* Implementar y configurar un modelo de detección de objetos YOLO (v5, v8 u otra versión).
-* Aplicar técnicas de flujo óptico (Lucas-Kanade o flujo denso) para el seguimiento de objetos entre fotogramas.
-* Integrar ambas técnicas en un pipeline coherente de análisis de video.
-* Evaluar cuantitativamente el desempeño del sistema.
-* Comunicar resultados técnicos de forma clara y profesional.
+* Implementar un detector de peatones usando YOLOv8.
+* Aplicar seguimiento multi-objeto mediante flujo óptico (Lucas–Kanade) y matching por IoU.
+* Integrar detección y tracking en un pipeline reproducible.
+* Evaluar el desempeño mediante métricas de detección (Precision, Recall, F1).
+* Generar visualizaciones y resultados claros para análisis técnico y académico.
 
 ---
 
 ### 📦 Datos
 
-* El dataset base tanto las imagenes como los metadatos proviene de un conjunto público de `https://lila.science/datasets/caltech-camera-traps`, más precisamente de `Benchmark images(6GB)` y `Metadata files for train/val/cis/trans splits (3MB)`
+El proyecto utiliza el dataset MOT17 (Multiple Object Tracking) en formato COCO-like, disponible públicamente.
 
+* Clases: pedestrian
+* Resolución típica: 1920×1080
+* Anotaciones por frame con bounding boxes
+* Secuencias temporales reales (tracking)
 
-**Nota:** mantener `5a0affad-23d2-11e8-a6a3-ec086b02610b` (u otros ejemplos) en `data/` para pruebas rápidas.
+El dataset base: `https://www.kaggle.com/datasets/nhnhunhch/mot17-coco`
 
 ---
 
@@ -94,7 +109,8 @@ pip install -r requirements.txt
 
 Abrir `run_pipeline.py`o desde la raíz del proyecto y ejecutar desde la terminar el siguiente comando:
 ``` 
- python -m src.run_pipeline --images data/sample/images --annotations data/sample/cis_val_annotations.json --out results/cis_val_run --detector yolov8n.pt --device cpu --n 200
+ python src\run_pipeline.py --images data\mot17\images --annotations data\mot17\annotations\train.json --out results\cis_val_run --detector yolov8n.pt --device cpu --n 300
+
 ```
 
 **Nota:** El archivo `notebooks/exploratorio.ipynb` es el único .ipynb ejecutable que nos permite realizar un primer acercamiento realizando resultados vistos a lo largo del curso sobre la data.
@@ -113,3 +129,4 @@ from src.utils import to_int_bbox
 from src.data_loader import get_image_list_from_json, load_annotations
 ```
 ---
+

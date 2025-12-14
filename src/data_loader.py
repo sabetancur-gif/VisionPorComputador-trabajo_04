@@ -33,7 +33,7 @@ def load_annotations(json_path, images_dir=None):
     imageid_to_name = {}
     imageid_to_filepath = {}
     for im in images:
-        iid = im.get('id') or im.get('file_name')
+        iid = im['id']
         fname = im.get('file_name') if 'file_name' in im else im.get('id')
         imageid_to_name[iid] = fname
         if images_dir:

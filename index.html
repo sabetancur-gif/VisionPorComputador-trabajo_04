@@ -169,6 +169,38 @@
         padding: 1.5rem;
       }
     }
+
+    /* FIGURES (IMAGES & VIDEO) */
+    .figure {
+      margin: 2rem auto;
+      text-align: center;
+    }
+
+    .figure img {
+      max-width: 650px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .figure video {
+      max-width: 720px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .figure .caption {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
   </style>
 </head>
 <body>
@@ -207,14 +239,31 @@
     </ul>
 
     <h2 id="introduccion">Introducción</h2>
-    <p>El análisis automatizado de video es uno de los campos más relevantes de la visión por computador, con aplicaciones en vigilancia, transporte inteligente, 
-      ecología, deportes y automatización industrial. En este proyecto se desarrolla un sistema completo capaz de detectar objetos mediante un modelo YOLO y 
-      seguirlos a lo largo del tiempo utilizando técnicas de flujo óptico, integrando ambos métodos dentro de un pipeline unificado de análisis de vídeo.</p>
-    <p>El trabajo se basa en videos reales provenientes del dataset de cámaras trampa de fauna del repositorio LILA.Caltech Camera Traps, los cuales contienen 
-      animales en ambientes naturales y condiciones visuales desafiantes. El sistema final no solo detecta objetos cuadro a cuadro, sino que también mantiene la 
-      identidad del mismo individuo durante varios fotogramas, generando trayectorias y estadísticas de presencia.</p>
-    <p>El resultado es una aplicación funcional que combina modelos modernos de detección con técnicas clásicas de seguimiento, evaluada mediante métricas 
-      cuantitativas y visualizaciones generadas a partir de la secuencia de video procesada.</p>
+
+    <p>
+    El análisis automatizado de secuencias de video es uno de los campos más relevantes dentro de la visión por computador, con aplicaciones directas en vigilancia urbana,
+    transporte inteligente, conteo de personas, análisis de multitudes y sistemas de seguridad. En este contexto, la detección y el seguimiento de objetos en movimiento
+    representan un problema central, ya que requieren no solo identificar objetos de interés en cada fotograma, sino también mantener su identidad a lo largo del tiempo.
+    </p>
+
+    <p>
+    En este proyecto se desarrolla un sistema completo de detección y seguimiento de peatones, integrando un modelo moderno de detección basado en YOLOv8 con un método
+    de seguimiento multiobjeto apoyado en técnicas de flujo óptico y emparejamiento por intersección sobre unión (IoU). Ambos componentes se articulan dentro de un
+    pipeline unificado que permite procesar secuencias de imágenes de manera ordenada, reproducible y evaluable.
+    </p>
+
+    <p>
+    El trabajo se basa en el dataset público MOT17, ampliamente utilizado en investigación académica para el problema de <i>Multiple Object Tracking (MOT)</i>.
+    Este dataset contiene secuencias de video reales en entornos urbanos, con múltiples peatones, oclusiones parciales y variaciones en iluminación, lo que representa
+    un escenario desafiante y realista para la evaluación de sistemas de seguimiento.
+    </p>
+
+    <p>
+    El sistema desarrollado no solo realiza detección de peatones cuadro a cuadro, sino que además asigna identificadores persistentes a cada individuo, permitiendo
+    analizar trayectorias, conteo de objetos y comportamiento temporal. El desempeño del sistema se evalúa mediante métricas cuantitativas de detección
+    (precisión, recall y F1-score), así como mediante visualizaciones y videos anotados que facilitan el análisis cualitativo de los resultados obtenidos.
+    </p>
+
 
     <h2 id="explicacion">Explicación del proyecto</h2> 
     <figure style="margin:1.25rem 0; max-width:900px;">
@@ -228,91 +277,271 @@
     </figure>
 
     <h2 id="marco">Marco teórico</h2>
-    <ul>
-      <li><strong>Detección de objetos con YOLO:</strong></li>
-      <p>YOLO (You Only Look Once) es una familia de modelos de detección basados en redes convolucionales que formulan la detección como un problema de regresión
-         directa a partir de una única pasada por la imagen <a href="#lizardi2025">(Lizardi Vargas, 2025)</a>, el modelo predice simultáneamente las cajas delimitadoras, las clases y las probabilidades asociadas. 
-         Gracias a su alta velocidad y precisión, YOLO se ha consolidado como uno de los enfoques más utilizados en aplicaciones de visión por computador en tiempo real.</p>
-      <p>En este proyecto se emplea YOLOv8, una versión moderna que incorpora un backbone optimizado para imágenes pequeñas, predicciones libres de anclas y una 
-        arquitectura capaz de realizar inferencia en tiempo real, además de contar con soporte directo mediante la librería Ultralytics. Para cada fotograma procesado, 
-        el detector produce un conjunto de bounding boxes, etiquetas y puntajes de confianza, los cuales constituyen la entrada principal del módulo de seguimiento.</p>
 
-      <li><strong>Seguimiento mediante flujo óptico:</strong></li>
-      <p>El flujo óptico describe el desplazamiento aparente de los pixeles entre fotogramas consecutivos y permite estimar el movimiento local dentro de una secuencia de video <a href="#monzon2013">(Monzón López, 2013)</a>.</p>
-      <p>En este proyecto se utiliza el método de Lucas–Kanade, un algoritmo diferencial ampliamente empleado que supone movimientos pequeños entre fotogramas y calcula 
-        los vectores de desplazamiento a partir de puntos característicos presentes en la imagen. Esta técnica resulta especialmente adecuada para el seguimiento continuo 
-        de objetos previamente detectados, ya que mantiene la coherencia temporal y conserva información estructural asociada a bordes y texturas.</p> 
-        <p>En el pipeline desarrollado, YOLO realiza primero la detección de los objetos relevantes y, posteriormente, el flujo óptico permite rastrear los puntos internos de cada caja, 
-        manteniendo así la identidad del objeto a lo largo de la secuencia</p>
-  
-      <li><strong>Integración detección + seguimiento:</strong></li>
-      <p>La integración de ambos métodos se enmarca en la estrategia tracking-by-detection, un paradigma ampliamente utilizado en sistemas de seguimiento en video <a href="#sun2021">(Sun et al., 2021)</a>. 
-        El proceso inicia con la detección de objetos mediante YOLO en un fotograma clave. Luego, dentro de cada caja detectada se seleccionan puntos característicos mediante el método Shi–Tomasi, los cuales sirven como referencia para el rastreo. </p>
-      <p>El algoritmo de Lucas–Kanade sigue dichos puntos en los fotogramas posteriores, permitiendo actualizar la posición de los objetos y asignarles identificadores 
-        persistentes a lo largo del tiempo. Cuando el número de puntos rastreables disminuye o la confianza del seguimiento cae por debajo de un umbral, se ejecuta 
-        nuevamente la detección completa para recalibrar el sistema. Esta combinación equilibra la precisión espacial de las redes profundas con la estabilidad temporal 
-        del flujo óptico, logrando un seguimiento eficiente y robusto.</p>
+    <ul>
+
+      <li><strong>Detección de objetos con YOLO</strong></li>
+      <p>
+      YOLO (You Only Look Once) es una familia de modelos de detección de objetos basada en redes neuronales convolucionales que formulan la detección como un problema de
+      regresión directa, permitiendo predecir simultáneamente las cajas delimitadoras, las clases y las probabilidades asociadas en una sola pasada por la imagen
+      <a href="#lizardi2025">(Lizardi Vargas, 2025)</a>. Gracias a su alta eficiencia computacional y buen balance entre velocidad y precisión, YOLO se ha consolidado como
+      una de las arquitecturas más utilizadas en aplicaciones de visión por computador en tiempo real.
+      </p>
+
+      <p>
+      En este proyecto se emplea YOLOv8, una versión moderna que adopta una arquitectura <i>anchor-free</i>, un backbone optimizado y un diseño modular que facilita su
+      integración mediante la librería Ultralytics. Para cada fotograma procesado, el detector genera un conjunto de cajas delimitadoras, etiquetas de clase y puntajes de
+      confianza, los cuales sirven como entrada principal para el módulo de seguimiento.
+      </p>
+
+      <li><strong>Seguimiento de objetos mediante flujo óptico</strong></li>
+      <p>
+      El flujo óptico describe el desplazamiento aparente de los píxeles entre fotogramas consecutivos y permite estimar el movimiento local dentro de una secuencia de video
+      <a href="#monzon2013">(Monzón López, 2013)</a>. Esta información resulta especialmente útil para modelar la continuidad temporal de los objetos en movimiento.
+      </p>
+
+      <p>
+      En este trabajo se utiliza el método de Lucas–Kanade, un algoritmo diferencial que asume desplazamientos pequeños entre fotogramas y calcula vectores de movimiento
+      a partir de puntos característicos previamente detectados. En particular, el flujo óptico se aplica sobre puntos internos de cada caja delimitadora detectada,
+      permitiendo estimar el desplazamiento del objeto completo entre fotogramas consecutivos.
+      </p>
+
+      <li><strong>Integración de detección y seguimiento (Tracking-by-Detection)</strong></li>
+      <p>
+      La integración de detección y seguimiento se enmarca dentro del paradigma <i>tracking-by-detection</i>, ampliamente utilizado en sistemas modernos de seguimiento
+      multiobjeto <a href="#sun2021">(Sun et al., 2021)</a>. En este enfoque, la detección de objetos se realiza de forma independiente en cada fotograma, mientras que el
+      seguimiento se encarga de asociar dichas detecciones a lo largo del tiempo.
+      </p>
+
+      <p>
+      En el pipeline desarrollado, YOLOv8 detecta peatones en cada fotograma y genera las cajas iniciales. Posteriormente, el módulo de seguimiento emplea flujo óptico
+      para predecir la posición de los objetos en el siguiente fotograma y utiliza un criterio de emparejamiento basado en la intersección sobre unión (IoU) para asociar
+      las detecciones actuales con los tracks existentes. A cada objeto se le asigna un identificador único que se mantiene mientras el seguimiento sea consistente.
+      </p>
+
+      <p>
+      Los tracks que no logran asociarse durante varios fotogramas consecutivos son eliminados, mientras que nuevas detecciones generan nuevos identificadores.
+      Esta estrategia permite combinar la precisión espacial de los modelos de detección profunda con la coherencia temporal proporcionada por el flujo óptico,
+      dando como resultado un sistema eficiente y robusto para el seguimiento de peatones en secuencias de video.
+      </p>
+
     </ul>
+
       
     <h2 id="metodologia">Metodología</h2>
-    <ol>
-      <p>La metodología desarrollada se basa en un enfoque tracking-by-detection que integra un detector YOLOv8 con un módulo de seguimiento por flujo óptico. 
-        El objetivo es identificar objetos en cada fotograma y mantener su identidad a lo largo del tiempo. Para ello se emplearon imágenes y anotaciones del 
-        dataset Caltech Camera Traps, las cuales fueron procesadas mediante herramientas propias del proyecto que normalizan rutas, formatos y estructuras 
-        COCO-like a través del módulo data_loader.py. Esto permitió construir un pipeline reproducible y compatible con distintos conjuntos de imágenes.</p>
-      <p>La etapa de detección se ejecutó con YOLOv8 utilizando pesos preentrenados de Ultralytics. Cada fotograma se procesó mediante el wrapper definido 
-        en detector.py, obteniendo cajas delimitadoras en formato XYXY, clases y puntajes de confianza. Las detecciones filtradas sirvieron de entrada para 
-        el módulo de seguimiento.</p>
-      <p>El seguimiento se implementó con un tracker basado en flujo óptico piramidal (Lucas–Kanade), definido en tracker.py. Para cada detección activa se 
-        generaron puntos característicos mediante el detector Shi–Tomasi y se estimó su desplazamiento entre fotogramas. Estos desplazamientos se usaron para 
-        predecir la nueva posición de cada caja. Posteriormente, las predicciones se asociaron a las detecciones del fotograma actual mediante el algoritmo 
-        Hungarian y una métrica de similitud basada en IoU, garantizando la asignación consistente de IDs. El sistema creó nuevos tracks cuando surgían objetos
-         no vistos y eliminó aquellos con varios fotogramas sin correspondencias válidas.</p>
-      <p>Todo el proceso se integró en el script run_pipeline.py, encargado de secuenciar detección, seguimiento, registro de resultados y evaluación. El pipeline 
-        generó archivos CSV con detecciones y trayectorias, métricas simples de desempeño (TP, FP, FN, precisión, recall), así como un video anotado producido por 
-        fauna.py, donde se visualizan cajas, IDs y etiquetas por fotograma. Esta estructura permitió evaluar de manera consistente la interacción entre detección y 
-        seguimiento y validar el funcionamiento global del sistema.</p>
-    </ol>
+
+    <p>
+    La metodología desarrollada se basa en un enfoque <i>tracking-by-detection</i> que integra un detector YOLOv8 con un módulo de seguimiento mediante flujo óptico.
+    El objetivo principal es detectar peatones en cada fotograma y mantener su identidad a lo largo del tiempo dentro de una secuencia de imágenes.
+    Para este fin se empleó el dataset MOT17, el cual contiene secuencias urbanas anotadas en formato COCO-like.
+    </p>
+
+    <p>
+    Las imágenes y anotaciones fueron cargadas y normalizadas mediante herramientas propias del proyecto, implementadas en el módulo
+    <code>data_loader.py</code>, el cual se encarga de unificar rutas, estructuras y formatos de anotación. Esto permitió construir un pipeline
+    reproducible y compatible con distintos conjuntos de imágenes y secuencias.
+    </p>
+
+    <p>
+    La etapa de detección se ejecutó utilizando YOLOv8 con pesos preentrenados proporcionados por la librería Ultralytics.
+    Cada fotograma fue procesado a través del wrapper definido en <code>detector.py</code>, generando como salida un conjunto de cajas delimitadoras
+    en formato XYXY, junto con sus respectivas clases y puntajes de confianza. Estas detecciones constituyen la base para el proceso de seguimiento.
+    </p>
+
+    <p>
+    El seguimiento de objetos se implementó mediante un tracker basado en flujo óptico piramidal de Lucas–Kanade, definido en
+    <code>tracker.py</code>. Para cada detección activa se seleccionaron puntos característicos dentro de la caja delimitadora utilizando el método
+    de Shi–Tomasi. A partir de estos puntos, se estimó el desplazamiento entre fotogramas consecutivos, lo que permitió predecir la nueva
+    posición de cada objeto.
+    </p>
+
+    <p>
+    Las predicciones obtenidas mediante flujo óptico se asociaron con las detecciones del fotograma actual utilizando el algoritmo de asignación
+    Hungarian, empleando como métrica de similitud la intersección sobre unión (IoU). Este proceso garantizó una asignación consistente de
+    identificadores (IDs) a lo largo del tiempo. El sistema creó nuevos tracks cuando aparecieron objetos no previamente observados y eliminó
+    aquellos que permanecieron varios fotogramas sin correspondencias válidas.
+    </p>
+
+    <p>
+    Todo el flujo fue integrado en el script <code>run_pipeline.py</code>, encargado de coordinar la detección, el seguimiento, el registro de resultados
+    y la evaluación del sistema. Como salida, el pipeline generó archivos CSV con las detecciones y trayectorias, métricas cuantitativas de
+    desempeño (precisión, recall y F1-score), así como un video anotado que visualiza las cajas delimitadoras, los identificadores
+    de seguimiento y la evolución temporal de los objetos detectados.
+    </p>
+
     
     <h2 id="resultados">Resultados y Análisis</h2>
-    <ol>
-      <p>El sistema de detección y seguimiento se evaluó procesando secuencias del dataset Caltech Camera Traps mediante el pipeline integrado. En primer lugar, 
-        YOLOv8 generó predicciones consistentes en la mayoría de los fotogramas, produciendo un total acumulado de detecciones proporcional al número de imágenes 
-        procesadas. Las cajas obtenidas presentaron niveles estables de confianza y permitieron inicializar adecuadamente los tracks.</p>
-      <p>El módulo de seguimiento basado en flujo óptico logró mantener identidades persistentes para la mayoría de los objetos visibles en la escena. La asociación 
-        entre predicciones y detecciones se realizó mediante IoU y Hungarian, reduciendo errores de emparejamiento y evitando la creación excesiva de nuevos IDs. 
-        Los tracks se actualizaron de manera estable incluso en presencia de pequeños desplazamientos, mientras que las situaciones con oclusiones o pérdida de 
-        puntos característicos activaron correctamente una nueva detección por parte del modelo, recuperando así las trayectorias.</p>
-      <p>Los resultados cuantitativos se registraron en archivos CSV, incluyendo el número de detecciones por fotograma, cajas normalizadas, identificadores asignados
-         y eventos de pérdida de seguimiento. Adicionalmente, se calcularon métricas simples de detección (precisión, recall y F1) utilizando las anotaciones COCO-like
-          de referencia. En general, el sistema mostró una correspondencia adecuada entre predicciones y ground truth en umbral IoU 0.5, con una proporción favorable 
-          de verdaderos positivos respecto a falsos positivos.</p>
-      <p>Finalmente, se generó un video anotado que ilustra visualmente el funcionamiento del pipeline. En este se observan las cajas de detección, los IDs asignados
-         y la evolución temporal de cada objeto. Este material permitió validar cualitativamente la coherencia del seguimiento y confirmar que la integración 
-         detección–flujo óptico produce trayectorias estables y coherentes en la mayoría de los casos.</p>
-    </ol>
 
-    <figure style="margin:1.25rem 0; max-width:900px;">
-      <video controls playsinline preload="metadata" style="width:100%; height:auto; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-        <source src="results/cis_val_run/tracking_web.mp4" type="video/mp4">
+    <p>
+    El sistema de detección y seguimiento fue evaluado sobre secuencias del dataset MOT17,
+    procesando un subconjunto representativo de fotogramas mediante el pipeline desarrollado.
+    Los resultados se analizan tanto desde una perspectiva exploratoria del dataset
+    como desde el desempeño del sistema de detección y seguimiento.
+    </p>
+
+    <h3>Análisis exploratorio del dataset</h3>
+
+    <p>
+    En primer lugar, se realizó un análisis exploratorio de las anotaciones del dataset con el fin
+    de caracterizar la complejidad de las escenas y justificar los desafíos del problema.
+    La <strong>Figura&nbsp;1</strong> muestra la distribución del número de peatones por imagen,
+    evidenciando una alta variabilidad entre fotogramas, con escenas poco congestionadas
+    y otras con alta densidad de personas.
+    </p>
+
+    <div class="figure">
+      <img 
+        src="results/exploratorio/mot17/objects_per_image_hist.png"/>
+      <div class="caption">
+        <strong>Figura 1.</strong> Distribución del número de peatones por imagen en el dataset MOT17.
+      </div>
+    </div>
+
+    <p>
+    La <strong>Figura&nbsp;2</strong> presenta la relación entre el ancho y el alto de las bounding boxes.
+    Se observa una correlación positiva que refleja la diversidad de escalas de los peatones
+    en la escena, producto de la perspectiva de la cámara y la distancia relativa de los objetos.
+    </p>
+
+    <div class="figure">
+      <img 
+        src="results/exploratorio/mot17/bbox_width_vs_height.png"/>
+      <div class="caption">
+        <strong>Figura 2.</strong> Relación ancho–alto de las cajas delimitadoras.
+      </div>
+    </div>
+
+    <p>
+    Por su parte, la <strong>Figura&nbsp;3</strong> ilustra la densidad de peatones por fotograma a lo largo
+    de la secuencia, mostrando cambios abruptos asociados a transiciones de escena y
+    zonas con mayor o menor concentración de objetos. Finalmente, la <strong>Figura&nbsp;4</strong>
+    muestra la distribución de la duración de los tracks, donde se aprecia que la mayoría
+    de los peatones son observados durante pocos fotogramas, mientras que un número
+    reducido mantiene trayectorias largas y estables.
+    </p>
+
+    <div class="figure">
+      <img src="results/exploratorio/mot17/objects_per_frame.png"/>
+      <div class="caption">
+        <strong>Figura 3.</strong> Número de peatones por fotograma en la secuencia MOT17.
+      </div>
+    </div>
+
+    <div class="figure">
+      <img src="results/exploratorio/mot17/track_durations.png"/>
+      <div class="caption">
+        <strong>Figura 4.</strong> Distribución de la duración de los tracks en número de frames.
+      </div>
+    </div>
+
+    <h3>Resultados de detección y seguimiento</h3>
+
+    <p>
+    En la etapa de detección, YOLOv8 generó predicciones consistentes en la mayoría de los
+    fotogramas procesados, permitiendo inicializar correctamente los tracks y alimentar
+    el módulo de seguimiento basado en flujo óptico. La <strong>Figura&nbsp;5</strong> muestra ejemplos
+    representativos de detección y seguimiento sobre distintas escenas,
+    donde se observa un buen ajuste espacial de las cajas delimitadoras incluso en presencia
+    de oclusiones parciales.
+    </p>
+
+    <div class="figure">
+      <img src="results/cis_val_run/figures/sample_frame_2.png"/>
+      <div class="caption">
+        <strong>Figura 5.</strong>. Ejemplo representativo de detección y seguimiento con IDs persistentes.
+      </div>
+    </div>
+
+    <p>
+    El módulo de seguimiento logró mantener identidades coherentes para la mayoría de los peatones visibles.
+    Los identificadores asignados permanecen estables a lo largo de varios fotogramas,
+    incluso ante pequeños desplazamientos y cambios de escala. La asociación detección–track
+    se realizó mediante una métrica IoU y el algoritmo Hungarian, lo que redujo la creación
+    innecesaria de nuevos IDs.
+    </p>
+
+    <p>
+    Desde el punto de vista cuantitativo, se calcularon métricas de detección utilizando un umbral
+    IoU de 0.5. La <strong>Figura&nbsp;6</strong> muestra los valores de precisión, recall y F1-score obtenidos.
+    El sistema presenta una <strong>alta precisión</strong>, lo que indica un bajo número de falsos positivos,
+    mientras que el recall es más bajo, reflejando pérdidas de detección en escenas con alta
+    congestión u oclusiones severas.
+    </p>
+
+    <div class="figure">
+      <img src="results/cis_val_run/figures/detection_metrics.png"/>
+      <div class="caption">
+        <strong>Figura 6.</strong> Métricas de detección (IoU = 0.5).
+      </div>
+    </div>
+
+    <p>
+    Adicionalmente, la <strong>Figura&nbsp;7</strong> muestra la evolución del número de detecciones por fotograma,
+    evidenciando un comportamiento estable y coherente con la dinámica de la escena.
+    </p>
+
+    <div class="figure">
+      <img src="results/cis_val_run/figures/detections_per_frame.png"/>
+      <div class="caption">
+        <strong>Figura 7.</strong> Evolución del número de detecciones por fotograma.
+      </div>
+    </div>
+
+    <h3>Evaluación cualitativa en video</h3>
+
+    <p>
+    Como resultado final, se generó un video anotado que permite evaluar visualmente el
+    comportamiento del sistema en una secuencia continua. En este video se observan las
+    cajas de detección, los identificadores asignados y la evolución temporal de cada peatón,
+    lo que permite validar cualitativamente la coherencia del seguimiento.
+    </p>
+
+    <div class="figure">
+      <video 
+        controls 
+        preload="auto" 
+        muted
+        playsinline>
+        <source src="results/cis_val_run/tracking_result_web.mp4" type="video/mp4">
         Tu navegador no soporta la etiqueta video.
       </video>
-      <figcaption style="font-size:0.9rem; color:var(--muted); margin-top:0.4rem;">
-        Video 2 — Secuencia de cámaras trampa con detección.
-      </figcaption>
-    </figure>
+      <div class="caption">
+        <strong>Video 1.</strong> Secuencia MOT17 con detección y seguimiento de peatones.
+      </div>
+    </div>
+
+    <h3>Discusión</h3>
+
+    <p>
+    En conjunto, los resultados muestran que la estrategia <em>tracking-by-detection</em>
+    implementada es efectiva para escenas urbanas con múltiples peatones.
+    La combinación de detección profunda con técnicas clásicas de flujo óptico logra
+    un balance adecuado entre precisión espacial y coherencia temporal.
+    </p>
+
+    <p>
+    Las principales limitaciones se presentan en escenarios con oclusiones prolongadas
+    y alta densidad de objetos, donde algunos tracks se fragmentan o se pierden temporalmente.
+    A pesar de ello, el sistema demuestra un desempeño sólido y constituye una base funcional
+    para extensiones futuras, como el uso de métricas MOT avanzadas (MOTA, MOTP)
+    o la incorporación de modelos de seguimiento basados en aprendizaje profundo.
+    </p>
+
 
     <h2 id="conclusion">Conclusión</h2>
-    <p>El sistema desarrollado demuestra que la combinación de un detector profundo como YOLOv8 con un módulo de seguimiento basado en flujo óptico constituye una 
-      solución eficiente para el seguimiento de fauna en secuencias de video. La integración bajo un enfoque tracking-by-detection permitió aprovechar la 
-      precisión del modelo de detección y la continuidad temporal del flujo óptico, logrando trayectorias estables y manteniendo la identidad de los objetos 
-      incluso ante desplazamientos moderados o variaciones en la escena.</p>
-    <p>Los experimentos mostraron que el pipeline es capaz de procesar secuencias completas, generar métricas confiables y producir videos anotados que facilitan 
-      la verificación visual del rendimiento. Aunque el sistema presenta limitaciones ante oclusiones prolongadas o movimientos bruscos, en general mantuvo un 
-      comportamiento robusto y coherente. En conjunto, los resultados indican que esta arquitectura es adecuada para aplicaciones de monitoreo automatizado y 
-      constituye una base sólida para futuros avances, como incorporar métricas MOT completas, filtros de predicción más avanzados o modelos entrenados 
-      específicamente para fauna silvestre.</p>
-
+    <p>
+    El sistema desarrollado demuestra que la combinación de un detector profundo como YOLOv8 con un módulo de seguimiento basado en flujo óptico constituye una 
+    solución eficiente para el seguimiento de objetos en secuencias de video. La integración bajo un enfoque <em>tracking-by-detection</em> permitió aprovechar la 
+    precisión espacial del modelo de detección y la coherencia temporal del flujo óptico, logrando trayectorias estables y manteniendo la identidad de los objetos 
+    incluso ante desplazamientos moderados y variaciones en la escena.
+    </p>
+    <p>
+    Los experimentos realizados evidenciaron que el pipeline es capaz de procesar secuencias completas, generar métricas cuantitativas confiables y producir videos 
+    anotados que facilitan la validación visual del desempeño. Si bien el sistema presenta limitaciones frente a oclusiones prolongadas, alta densidad de objetos o 
+    movimientos abruptos, en términos generales mostró un comportamiento robusto y consistente. En conjunto, los resultados indican que esta arquitectura es adecuada 
+    para aplicaciones de monitoreo automatizado y constituye una base sólida para trabajos futuros, tales como la incorporación de métricas MOT avanzadas (MOTA, MOTP), 
+    métodos de predicción más sofisticados o el entrenamiento de modelos especializados para escenarios específicos.
+    </p>
 
     <h2 id="reporte">Reporte de contribución individual</h2>
     <p>El desarrollo de este proyecto se realizó de manera colectiva, manteniendo una comunicación constante entre los integrantes del equipo. 

@@ -20,7 +20,7 @@ class YOLODetector:
         device (str): 'cpu' o 'cuda'.
         cls_map (dict): opcional, map id->name para clases del dataset.
     """
-    def __init__(self, weights='yolov8n.pt', conf=0.25, device='cpu', cls_map=None):
+    def __init__(self, weights='yolov8n.pt', conf=0.45, device='cpu', cls_map=None):
         self.weights = weights
         self.conf = conf
         self.device = device
